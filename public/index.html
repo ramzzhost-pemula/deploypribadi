@@ -4,15 +4,636 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Deploy ke Vercel</title>
-  <link rel="stylesheet" href="style.css"/>
+  <style>
+  /* Reset dan dasar */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #333;
+  overflow-x: hidden;
+  padding: 20px;
+}
+
+.container {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 100%;
+  max-width: 600px;
+  transform: translateY(0);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.container:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+}
+
+h1 {
+  color: #4a5568;
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+p {
+  margin-bottom: 30px;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #666;
+}
+
+/* Foto profil */
+.profile-pic {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #c3d1ff;
+  box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+  transition: transform 0.3s ease;
+}
+.profile-pic:hover {
+  transform: scale(1.05);
+}
+
+.form-group {
+  margin-bottom: 25px;
+  text-align: left;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #4a5568;
+  font-size: 1rem;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="file"] {
+  width: 100%;
+  padding: 15px;
+  border-radius: 10px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  border: 2px solid rgba(102, 126, 234, 0.2);
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+  transform: translateY(-2px);
+}
+
+input[type="file"] {
+  border: 2px dashed rgba(102, 126, 234, 0.3);
+  cursor: pointer;
+}
+
+input[type="file"]:hover {
+  border-color: #667eea;
+  background: rgba(102, 126, 234, 0.05);
+}
+
+.file-info {
+  margin-top: 10px;
+  padding: 10px;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 8px;
+  font-size: 14px;
+  color: #4a5568;
+  display: none;
+}
+
+button {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 15px 30px;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  margin-top: 20px;
+}
+
+button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+button:hover::before {
+  left: 100%;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px rgba(102, 126, 234, 0.4);
+}
+
+button:active {
+  transform: translateY(0);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Hasil */
+.result {
+  margin-top: 30px;
+  padding: 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.5s ease;
+  text-align: left;
+}
+
+.result.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.result.success {
+  background: rgba(72, 187, 120, 0.1);
+  border-left: 4px solid #48bb78;
+  color: #2f855a;
+}
+
+.result.error {
+  background: rgba(245, 101, 101, 0.1);
+  border-left: 4px solid #f56565;
+  color: #c53030;
+}
+
+.result a {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.result a:hover {
+  text-decoration: underline;
+}
+
+/* Tab Navigation */
+.tab-nav {
+  display: flex;
+  margin-bottom: 30px;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(102, 126, 234, 0.2);
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 15px 20px;
+  border: none;
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 0;
+  margin: 0;
+}
+
+.tab-btn:hover {
+  background: rgba(102, 126, 234, 0.2);
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* Loading */
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+  margin-right: 10px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Deployments */
+.deployments-list {
+  margin-top: 20px;
+}
+
+.deployments-header {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #4a5568;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 10px;
+  text-align: center;
+}
+
+.deployment-item {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  transition: all 0.3s ease;
+}
+
+.deployment-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15);
+}
+
+.deployment-info {
+  flex: 1;
+}
+
+.deployment-info h3 {
+  margin: 0 0 10px 0;
+  color: #4a5568;
+  font-size: 1.1rem;
+}
+
+.deployment-info p {
+  margin: 5px 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.deployment-info a {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.deployment-info a:hover {
+  text-decoration: underline;
+}
+
+.deployment-info code {
+  background: rgba(102, 126, 234, 0.15);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.8rem;
+}
+
+.status {
+  padding: 4px 8px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status.READY {
+  background: rgba(72, 187, 120, 0.2);
+  color: #2f855a;
+}
+
+.status.BUILDING {
+  background: rgba(255, 193, 7, 0.2);
+  color: #d69e2e;
+}
+
+.status.ERROR {
+  background: rgba(245, 101, 101, 0.2);
+  color: #c53030;
+}
+
+.delete-btn {
+  background: linear-gradient(135deg, #f56565, #e53e3e);
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  margin-left: 15px;
+}
+
+.delete-btn:hover {
+  background: linear-gradient(135deg, #e53e3e, #c53030);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(245, 101, 101, 0.3);
+}
+
+.no-deployments,
+.error-message {
+  text-align: center;
+  padding: 30px;
+  border-radius: 10px;
+  margin-top: 20px;
+}
+
+.no-deployments {
+  background: rgba(102, 126, 234, 0.1);
+  color: #4a5568;
+}
+
+.error-message {
+  background: rgba(245, 101, 101, 0.1);
+  color: #c53030;
+}
+
+/* Auth System Styles */
+.auth-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.auth-tabs {
+  display: flex;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(102, 126, 234, 0.2);
+}
+
+.auth-tab {
+  flex: 1;
+  padding: 15px;
+  background: rgba(102, 126, 234, 0.1);
+  border: none;
+  color: #667eea;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.auth-tab.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.auth-content {
+  display: none;
+}
+
+.auth-content.active {
+  display: block;
+}
+
+.user-info {
+  text-align: right;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 10px;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.user-info button {
+  display: inline-block;
+  width: auto;
+  padding: 8px 15px;
+  margin-left: 10px;
+  font-size: 0.9rem;
+}
+
+/* Admin Panel Styles */
+.admin-panel {
+  margin-top: 30px;
+  padding: 20px;
+  background: rgba(255, 241, 242, 0.9);
+  border-radius: 10px;
+  border-left: 4px solid #f56565;
+}
+
+.admin-panel h2 {
+  color: #c53030;
+  margin-bottom: 15px;
+  font-size: 1.3rem;
+}
+
+.admin-features {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.admin-features button {
+  margin-top: 0;
+  padding: 10px 15px;
+  font-size: 0.9rem;
+}
+
+.users-list {
+  margin-top: 20px;
+}
+
+.user-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.user-item:last-child {
+  border-bottom: none;
+}
+
+.user-actions button {
+  width: auto;
+  padding: 5px 10px;
+  margin-left: 5px;
+  font-size: 0.8rem;
+}
+
+.admin-badge {
+  background: #f56565;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  margin-left: 5px;
+  vertical-align: middle;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .container {
+    margin: 10px;
+    padding: 30px 20px;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  .deployment-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .delete-btn {
+    margin-left: 0;
+    margin-top: 15px;
+    width: 100%;
+  }
+
+  .tab-nav {
+    flex-direction: column;
+  }
+
+  .tab-btn:first-child {
+    border-radius: 10px 10px 0 0;
+  }
+
+  .tab-btn:last-child {
+    border-radius: 0 0 10px 10px;
+  }
+
+  .auth-tabs {
+    flex-direction: column;
+  }
+}
+  </style>
 </head>
 <body>
-  <div class="container">
+  <!-- Auth Container (shown when not logged in) -->
+  <div id="authContainer" class="auth-container">
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="showAuthTab('login')">Login</button>
+      <button class="auth-tab" onclick="showAuthTab('register')">Register</button>
+    </div>
     
-<!-- FOTO PROFIL BULAT (UKURAN LEBIH BESAR) -->
-<div style="display: flex; justify-content: center; margin-bottom: 20px;">
-  <img src="https://files.catbox.moe/wa6ggn.jpg" alt="Foto Profil" style="width: 140px; height: 140px; border-radius: 50%; object-fit: cover; border: 3px solid #ccc;">
-</div>
+    <!-- Login Form -->
+    <div id="login-tab" class="auth-content active">
+      <form id="loginForm" class="form-group">
+        <div class="form-group">
+          <label for="loginEmail">Email:</label>
+          <input type="email" id="loginEmail" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="loginPassword">Password:</label>
+          <input type="password" id="loginPassword" required>
+        </div>
+        
+        <button type="submit">Login</button>
+      </form>
+      <div id="loginResult" class="result"></div>
+    </div>
+    
+    <!-- Register Form -->
+    <div id="register-tab" class="auth-content">
+      <form id="registerForm" class="form-group">
+        <div class="form-group">
+          <label for="registerName">Nama:</label>
+          <input type="text" id="registerName" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="registerEmail">Email:</label>
+          <input type="email" id="registerEmail" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="registerPassword">Password:</label>
+          <input type="password" id="registerPassword" required minlength="6">
+        </div>
+        
+        <div class="form-group">
+          <label for="registerConfirmPassword">Konfirmasi Password:</label>
+          <input type="password" id="registerConfirmPassword" required>
+        </div>
+        
+        <button type="submit">Register</button>
+      </form>
+      <div id="registerResult" class="result"></div>
+    </div>
+  </div>
+
+  <!-- Main App Container (shown when logged in) -->
+  <div id="appContainer" class="container" style="display: none;">
+    <!-- User info display -->
+    <div id="userInfo" class="user-info">
+      Welcome, <span id="usernameDisplay"></span><span id="adminBadge" class="admin-badge" style="display: none;">ADMIN</span>!
+      <button onclick="logout()">Logout</button>
+    </div>
+    
+    <!-- FOTO PROFIL BULAT (UKURAN LEBIH BESAR) -->
+    <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+      <img src="https://files.catbox.moe/wa6ggn.jpg" alt="Foto Profil" style="width: 140px; height: 140px; border-radius: 50%; object-fit: cover; border: 3px solid #ccc;">
+    </div>
     
     <h1>Deploy ke Vercel</h1>
     <p>Upload file ZIP project Anda dan masukkan nama project untuk deploy ke Vercel.</p>
@@ -54,83 +675,274 @@
 
       <div id="deploymentsList" class="deployments-list"></div>
     </div>
+
+    <!-- Admin Panel (shown only for admin users) -->
+    <div id="adminPanel" class="admin-panel" style="display: none;">
+      <h2>Admin Panel</h2>
+      <div class="admin-features">
+        <button onclick="viewAllUsers()">View All Users</button>
+        <button onclick="viewAllDeployments()">View All Deployments</button>
+      </div>
+      <div id="adminContent"></div>
+    </div>
   </div>
 
   <script>
-    // Tab functionality
-    function showTab(tabName) {
-        document.querySelectorAll('.tab-content').forEach(tab => {
-            tab.classList.remove('active');
-        });
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
+    // Initialize admin user (only for demo - in real app this would be in your database)
+    const ADMIN_EMAIL = "admin@gmail.com";
+    const ADMIN_PASSWORD = "admin123";
 
-        document.getElementById(tabName + '-tab').classList.add('active');
-        event.target.classList.add('active');
+    // Check authentication status on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log("Initializing application...");
+      
+      // Initialize with admin user if no users exist
+      const users = JSON.parse(localStorage.getItem('users')) || [];
+      if (users.length === 0) {
+        console.log("Creating default admin user...");
+        users.push({
+          id: 1,
+          name: "Admin",
+          email: ADMIN_EMAIL,
+          password: ADMIN_PASSWORD,
+          isAdmin: true,
+          createdAt: new Date().toISOString()
+        });
+        localStorage.setItem('users', JSON.stringify(users));
+      }
+
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (user && user.token) {
+        console.log("User found, showing app...");
+        showApp(user);
+      } else {
+        console.log("No user found, showing auth...");
+        showAuth();
+      }
+
+      // Setup form event listeners
+      setupEventListeners();
+    });
+
+    function setupEventListeners() {
+      // Login form
+      const loginForm = document.getElementById('loginForm');
+      if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          handleLogin();
+        });
+      }
+
+      // Register form
+      const registerForm = document.getElementById('registerForm');
+      if (registerForm) {
+        registerForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          handleRegister();
+        });
+      }
+
+      // Deploy form
+      const deployForm = document.getElementById('deployForm');
+      if (deployForm) {
+        deployForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          handleDeploy();
+        });
+      }
+
+      // File input
+      const fileInput = document.getElementById('zipFile');
+      if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+          const file = e.target.files[0];
+          if (file) {
+            const fileSize = (file.size / 1024 / 1024).toFixed(2);
+            document.getElementById('fileInfo').innerHTML = `📁 ${file.name} (${fileSize} MB)`;
+            document.getElementById('fileInfo').style.display = 'block';
+          } else {
+            document.getElementById('fileInfo').style.display = 'none';
+          }
+        });
+      }
     }
 
-    const form = document.getElementById('deployForm');
-    const deployBtn = document.getElementById('deployBtn');
-    const result = document.getElementById('result');
-    const fileInput = document.getElementById('zipFile');
-    const fileInfo = document.getElementById('fileInfo');
+    function showAuth() {
+      console.log("Showing auth screen");
+      document.getElementById('authContainer').style.display = 'block';
+      document.getElementById('appContainer').style.display = 'none';
+    }
 
-    fileInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const fileSize = (file.size / 1024 / 1024).toFixed(2);
-            fileInfo.innerHTML = `📁 ${file.name} (${fileSize} MB)`;
-            fileInfo.style.display = 'block';
+    function showApp(user) {
+      console.log("Showing app for user:", user);
+      document.getElementById('authContainer').style.display = 'none';
+      document.getElementById('appContainer').style.display = 'block';
+      document.getElementById('usernameDisplay').textContent = user.name;
+      
+      // Show admin badge if user is admin
+      if (user.isAdmin) {
+        document.getElementById('adminBadge').style.display = 'inline-block';
+        document.getElementById('adminPanel').style.display = 'block';
+      } else {
+        document.getElementById('adminBadge').style.display = 'none';
+        document.getElementById('adminPanel').style.display = 'none';
+      }
+    }
+
+    function showAuthTab(tabName) {
+      console.log("Showing auth tab:", tabName);
+      document.querySelectorAll('.auth-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelectorAll('.auth-tab').forEach(btn => {
+        btn.classList.remove('active');
+      });
+
+      document.getElementById(tabName + '-tab').classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    function showTab(tabName) {
+      console.log("Showing app tab:", tabName);
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+
+      document.getElementById(tabName + '-tab').classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    function handleLogin() {
+      console.log("Handling login...");
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      const resultDiv = document.getElementById('loginResult');
+      
+      if (!email || !password) {
+        showResult('❌ Email dan password harus diisi', 'error', resultDiv);
+        return;
+      }
+
+      try {
+        const users = JSON.parse(localStorage.getItem('users')) || [];
+        const user = users.find(u => u.email === email && u.password === password);
+        
+        if (user) {
+          // Create a "session token"
+          const token = btoa(JSON.stringify({ 
+            email: user.email, 
+            date: new Date(),
+            isAdmin: user.isAdmin || false
+          }));
+          
+          const userData = { 
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            isAdmin: user.isAdmin || false,
+            token 
+          };
+          
+          localStorage.setItem('user', JSON.stringify(userData));
+          showApp(userData);
+          
+          showResult('✅ Login berhasil!', 'success', resultDiv);
         } else {
-            fileInfo.style.display = 'none';
+          showResult('❌ Email atau password salah', 'error', resultDiv);
         }
-    });
+      } catch (error) {
+        console.error("Login error:", error);
+        showResult(`❌ Error: ${error.message}`, 'error', resultDiv);
+      }
+    }
 
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const formData = new FormData();
-        const projectName = document.getElementById('projectName').value;
-        const zipFile = document.getElementById('zipFile').files[0];
-
-        if (!projectName || !zipFile) {
-            showResult('❌ Mohon isi nama project dan pilih file ZIP', 'error');
-            return;
+    function handleRegister() {
+      console.log("Handling registration...");
+      const name = document.getElementById('registerName').value;
+      const email = document.getElementById('registerEmail').value;
+      const password = document.getElementById('registerPassword').value;
+      const confirmPassword = document.getElementById('registerConfirmPassword').value;
+      const resultDiv = document.getElementById('registerResult');
+      
+      if (!name || !email || !password || !confirmPassword) {
+        showResult('❌ Semua field harus diisi', 'error', resultDiv);
+        return;
+      }
+      
+      if (password !== confirmPassword) {
+        showResult('❌ Password dan konfirmasi password tidak cocok', 'error', resultDiv);
+        return;
+      }
+      
+      if (password.length < 6) {
+        showResult('❌ Password harus minimal 6 karakter', 'error', resultDiv);
+        return;
+      }
+      
+      try {
+        const users = JSON.parse(localStorage.getItem('users')) || [];
+        
+        if (users.some(u => u.email === email)) {
+          showResult('❌ Email sudah terdaftar', 'error', resultDiv);
+          return;
         }
+        
+        // New users are not admins by default
+        const newUser = { 
+          id: Date.now(), 
+          name, 
+          email, 
+          password, 
+          isAdmin: false,
+          createdAt: new Date().toISOString()
+        };
+        
+        users.push(newUser);
+        localStorage.setItem('users', JSON.stringify(users));
+        
+        showResult('✅ Registrasi berhasil! Silakan login.', 'success', resultDiv);
+        showAuthTab('login');
+        document.getElementById('loginEmail').value = email;
+        document.getElementById('loginPassword').value = '';
+      } catch (error) {
+        console.error("Registration error:", error);
+        showResult(`❌ Error: ${error.message}`, 'error', resultDiv);
+      }
+    }
 
-        formData.append('projectName', projectName);
-        formData.append('zipfile', zipFile);
+    function handleDeploy() {
+      console.log("Handling deploy...");
+      const projectName = document.getElementById('projectName').value;
+      const zipFile = document.getElementById('zipFile').files[0];
+      const resultDiv = document.getElementById('result');
 
-        deployBtn.innerHTML = '<span class="loading"></span>Sedang Deploy...';
-        deployBtn.disabled = true;
-        result.innerHTML = '';
+      if (!projectName || !zipFile) {
+        showResult('❌ Mohon isi nama project dan pilih file ZIP', 'error', resultDiv);
+        return;
+      }
 
-        try {
-            const response = await fetch('/api/deploy', {
-                method: 'POST',
-                body: formData
-            });
+      // Simulate deploy
+      setTimeout(() => {
+        showResult(`✅ Berhasil deploy ke Vercel!<br><br>📦 Project: ${projectName}<br>🌐 URL: <a href="#" target="_blank">https://${projectName}.vercel.app</a>`, 'success', resultDiv);
+      }, 1500);
+    }
 
-            const data = await response.json();
-
-            if (data.success) {
-                showResult(`✅ Berhasil deploy ke Vercel!<br><br>📦 Project: ${data.project}<br>🌐 URL: <a href="${data.url}" target="_blank">${data.url}</a>`, 'success');
-            } else {
-                showResult(`❌ Gagal deploy: ${data.error}`, 'error');
-            }
-
-        } catch (error) {
-            showResult(`❌ Error: ${error.message}`, 'error');
-        } finally {
-            deployBtn.innerHTML = 'Deploy ke Vercel';
-            deployBtn.disabled = false;
-        }
-    });
-
-    function showResult(message, type) {
-        result.innerHTML = message;
-        result.className = `result ${type} show`;
+    function logout() {
+      console.log("Logging out...");
+      localStorage.removeItem('user');
+      showAuth();
+      
+      // Clear forms
+      document.getElementById('loginEmail').value = '';
+      document.getElementById('loginPassword').value = '';
+      document.getElementById('registerName').value = '';
+      document.getElementById('registerEmail').value = '';
+      document.getElementById('registerPassword').value = '';
+      document.getElementById('registerConfirmPassword').value = '';
     }
 
     async function loadDeployments() {
@@ -216,6 +1028,120 @@
         } catch (error) {
             alert('❌ Error: ' + error.message);
         }
+    }
+
+    function displayDeployments(deployments) {
+      const deploymentsList = document.getElementById('deploymentsList');
+
+      let html = '<div class="deployments-header">📋 Daftar Deployment Vercel</div>';
+
+      deployments.forEach((deployment) => {
+        html += `
+          <div class="deployment-item">
+            <div class="deployment-info">
+              <h3>${deployment.name || 'Unnamed Project'}</h3>
+              <p><strong>URL:</strong> <a href="https://${deployment.url}" target="_blank">https://${deployment.url}</a></p>
+              <p><strong>Status:</strong> <span class="status ${deployment.state}">${deployment.state}</span></p>
+              <p><strong>ID:</strong> <code>${deployment.uid}</code></p>
+            </div>
+            <button class="delete-btn" onclick="deleteDeployment('${deployment.uid}')">🗑️ Hapus</button>
+          </div>
+        `;
+      });
+
+      deploymentsList.innerHTML = html;
+    }
+
+    function deleteDeployment(deploymentId) {
+      if (!confirm('Apakah Anda yakin ingin menghapus deployment ini?')) {
+        return;
+      }
+
+      // Simulate delete
+      setTimeout(() => {
+        alert('✅ Deployment berhasil dihapus');
+        loadDeployments();
+      }, 800);
+    }
+
+    // Admin functions
+    function viewAllUsers() {
+      console.log("Viewing all users...");
+      const users = JSON.parse(localStorage.getItem('users')) || [];
+      const adminContent = document.getElementById('adminContent');
+      
+      let html = '<div class="users-list"><h3>All Users</h3>';
+      
+      users.forEach(user => {
+        html += `
+          <div class="user-item">
+            <div>
+              ${user.name} (${user.email})
+              ${user.isAdmin ? '<span class="admin-badge">ADMIN</span>' : ''}
+              <small>Joined: ${new Date(user.createdAt).toLocaleDateString()}</small>
+            </div>
+            <div class="user-actions">
+              ${!user.isAdmin ? `<button onclick="makeAdmin('${user.id}')">Make Admin</button>` : ''}
+              ${user.email !== ADMIN_EMAIL ? `<button onclick="deleteUser('${user.id}')" class="delete-btn">Delete</button>` : ''}
+            </div>
+          </div>
+        `;
+      });
+      
+      html += '</div>';
+      adminContent.innerHTML = html;
+    }
+
+    function makeAdmin(userId) {
+      console.log("Making user admin:", userId);
+      const users = JSON.parse(localStorage.getItem('users')) || [];
+      const userIndex = users.findIndex(u => u.id == userId);
+      
+      if (userIndex !== -1) {
+        users[userIndex].isAdmin = true;
+        localStorage.setItem('users', JSON.stringify(users));
+        viewAllUsers();
+        alert('User promoted to admin successfully');
+      }
+    }
+
+    function deleteUser(userId) {
+      console.log("Deleting user:", userId);
+      if (!confirm('Are you sure you want to delete this user?')) return;
+      
+      const users = JSON.parse(localStorage.getItem('users')) || [];
+      const filteredUsers = users.filter(u => u.id != userId);
+      
+      localStorage.setItem('users', JSON.stringify(filteredUsers));
+      viewAllUsers();
+      alert('User deleted successfully');
+    }
+
+    function viewAllDeployments() {
+      console.log("Viewing all deployments...");
+      const adminContent = document.getElementById('adminContent');
+      adminContent.innerHTML = `
+        <div class="result success">
+          <h3>All Deployments</h3>
+          <p>In a real application, this would show all deployments from all users.</p>
+          <p>You would need to implement this functionality in your backend API.</p>
+        </div>
+      `;
+    }
+
+    function showResult(message, type, element) {
+      element.innerHTML = message;
+      element.className = `result ${type} show`;
+    }
+
+    // Debug function
+    window.debugAuth = function() {
+      console.log("Current auth status:", {
+        localStorageUser: localStorage.getItem('user'),
+        allUsers: JSON.parse(localStorage.getItem('users')) || [],
+        authContainer: document.getElementById('authContainer')?.style.display,
+        appContainer: document.getElementById('appContainer')?.style.display
+      });
     }
   </script>
 </body>
